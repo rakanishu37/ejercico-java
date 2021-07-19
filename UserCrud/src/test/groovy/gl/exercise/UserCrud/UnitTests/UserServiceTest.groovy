@@ -31,7 +31,6 @@ class UserServiceTest extends Specification{
         userService = new UserService(userRepository, phoneService);
     }
 
-    //todo uno de integracion?
     def "should return a valid UserInfoResponseDTO"() {
         given:
             userRepository.findByEmail(_ as String) >> Optional.empty()
@@ -49,20 +48,19 @@ class UserServiceTest extends Specification{
 
             Instant instant = Instant.now();
 
-        //TODO preguntar si usar clase utils en vez de privados
-            User persistedUser = User.builder()
-                    .name(dto.getName())
-                    .email(dto.getEmail())
-                    .password("aoeu123")
-                    .externalId("aoeu")
-                    .createdAt(instant)
-                    .modifiedAt(instant)
-                    .lastLogin(instant)
-                    .token("dummy token")
-                    .isActive(Boolean.TRUE)
-                    .build();
-
-            userRepository.save(_) >> persistedUser
+            userRepository.save(_ as User) >> { User u ->
+               return User.builder()
+                       .name(u.getName())
+                       .email(u.getEmail())
+                       .password(u.getPassword())
+                       .externalId(u.getExternalId())
+                       .createdAt(instant)
+                       .modifiedAt(instant)
+                       .lastLogin(instant)
+                       .token(u.getToken())
+                       .isActive(u.getIsActive())
+                       .build();
+            }
         when:
             UserCreationInfoResponseDTO valid = userService.createUser(dto)
         then:
